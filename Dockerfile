@@ -1,10 +1,9 @@
-# Use an official Python base image (Debian-based) with the latest Python version (3.12)
+# Use Python 3.12 for compatibility with numpy 1.23.0
 FROM python:3.12-slim-bullseye
 
-# Install system dependencies for pypotrace and required Python build tools
+# Install system dependencies for pypotrace
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libagg-dev \
-    python3-distutils \
     potrace \
  && rm -rf /var/lib/apt/lists/*
 
