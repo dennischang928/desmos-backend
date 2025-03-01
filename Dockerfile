@@ -1,9 +1,12 @@
 # Use Python 3.12 for compatibility with numpy 1.23.0
 FROM python:3.12-slim-bullseye
 
-# Install system dependencies for pypotrace, Pillow, and other packages
+# Install system dependencies for building Python packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
     libagg-dev \
+    libjpeg-dev \
     potrace \
     pkg-config \
     zlib1g-dev \
