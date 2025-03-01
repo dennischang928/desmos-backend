@@ -50,24 +50,26 @@ def get_bezier_strings_from_trace(trace):
 
 def get_contours_from_image(image):
     """
-    Convert the input image to grayscale and detect edges using Canny.
+    Convert the input image to grayscale and detect edges using Canny with higher thresholds.
     """
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # Use Canny edge detection; adjust thresholds as needed.
-    edges = cv2.Canny(gray, 30, 200)
+    # Increased thresholds to detect only stronger edges
+    edges = cv2.Canny(gray, 100, 200)  # Changed from (30, 200)
     return edges
 
 def get_trace_from_contours(contours):
     """
-    Create a potrace.Bitmap from the edge-detected image and trace it.
-    Adjust parameters as needed.
+    Create a potrace.Bitmap from the edge-detected image and trace it with aggressive simplification.
     """
-    # Note: The contours image is expected to be a binary (0/255) image.
-    # potrace.Bitmap expects a 2D array of 0s and 1s.
     binary = (contours > 0).astype(np.uint8)
     bmp = potrace.Bitmap(binary)
-    # Trace the bitmap. Parameters (like turning policy, turd size, etc.) can be tuned.
-    trace = bmp.trace(2, potrace.TURNPOLICY_MINORITY, 1.0, 1, 0.5)
+    trace = bmp.trace(
+        turdsize=10,        # Increased from 5 - ignore smaller areas
+        turnpolicy=potrace.TURNPOLICY_MINORITY,
+        alphamax=2.5,       # Increased from 2.0 - more aggressive curve smoothing
+        opticurve=1,
+        opttolerance=0.2    # Reduced from 0.5 - less precise but simpler curves
+    )
     return trace
 
 # --- Flask Endpoint ---
@@ -75,8 +77,7 @@ def get_trace_from_contours(contours):
 @app.route('/process_image', methods=['POST'])
 def process_image():
     """
-    Endpoint that receives an image file, processes it, and returns an array of
-    Bezier curve strings.
+    Endpoint that receives an image file and returns simplified Bezier curves.
     """
     if 'image' not in request.files:
         return jsonify({'error': 'No image file provided.'}), 400
@@ -101,7 +102,19 @@ def process_image():
         trace = get_trace_from_contours(contours)
         # Convert the traced curves into Bezier curve strings
         bezier_strings = get_bezier_strings_from_trace(trace)
-        return jsonify({'result': bezier_strings})
+
+        # Limit the number of curves
+        MAX_CURVES = 200  # Adjust this value as needed
+        if len(bezier_strings) > MAX_CURVES:
+            # Take every nth curve to get approximately MAX_CURVES curves
+            step = len(bezier_strings) // MAX_CURVES
+            bezier_strings = bezier_strings[::step][:MAX_CURVES]
+
+        # Return simplified response with curve count
+        return jsonify({
+            'curves': bezier_strings,
+            'count': len(bezier_strings)
+        })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
