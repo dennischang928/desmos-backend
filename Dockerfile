@@ -7,8 +7,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libagg-dev \
     libgl1 \
+    libglib2.0-0 \
+    libglx0 \
     libjpeg-dev \
     libpotrace-dev \
+    libsm6 \
+    libxext6 \
     potrace \
     pkg-config \
     zlib1g-dev \
