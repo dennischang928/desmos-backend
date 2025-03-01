@@ -50,25 +50,25 @@ def get_bezier_strings_from_trace(trace):
 
 def get_contours_from_image(image):
     """
-    Convert the input image to grayscale and detect edges using Canny with higher thresholds.
+    Convert the input image to grayscale and detect edges using Canny with balanced thresholds.
     """
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # Increased thresholds to detect only stronger edges
-    edges = cv2.Canny(gray, 100, 200)  # Changed from (30, 200)
+    # Lower the minimum threshold to detect more edges
+    edges = cv2.Canny(gray, 50, 150)  # Changed from (100, 200)
     return edges
 
 def get_trace_from_contours(contours):
     """
-    Create a potrace.Bitmap from the edge-detected image and trace it with aggressive simplification.
+    Create a potrace.Bitmap from the edge-detected image with parameters tuned for detail.
     """
     binary = (contours > 0).astype(np.uint8)
     bmp = potrace.Bitmap(binary)
     trace = bmp.trace(
-        turdsize=7,        # Increased from 5 - ignore smaller areas
+        turdsize=4,         # Reduced from 7 - keep smaller details
         turnpolicy=potrace.TURNPOLICY_MINORITY,
-        alphamax=3,       # Increased from 2.0 - more aggressive curve smoothing
+        alphamax=1.0,       # Reduced from 3.0 - preserve more corners
         opticurve=1,
-        opttolerance=0.2    # Reduced from 0.5 - less precise but simpler curves
+        opttolerance=0.4    # Increased from 0.2 - more precise curves
     )
     return trace
 
@@ -103,17 +103,30 @@ def process_image():
         # Convert the traced curves into Bezier curve strings
         bezier_strings = get_bezier_strings_from_trace(trace)
 
-        # Limit the number of curves
-        MAX_CURVES = 3500  # Adjust this value as needed
+        # Adjusted curve limit for more detail
+        MAX_CURVES = 5000  # Increased from 3500
         if len(bezier_strings) > MAX_CURVES:
-            # Take every nth curve to get approximately MAX_CURVES curves
-            step = len(bezier_strings) // MAX_CURVES
-            bezier_strings = bezier_strings[::step][:MAX_CURVES]
+            # Use more sophisticated sampling to preserve detail
+            # Take more curves from complex regions
+            complexity_scores = [len(curve) for curve in bezier_strings]
+            sorted_indices = sorted(range(len(complexity_scores)), 
+                                 key=lambda k: complexity_scores[k], 
+                                 reverse=True)
+            selected_indices = sorted_indices[:MAX_CURVES]
+            selected_indices.sort()  # Keep original order
+            bezier_strings = [bezier_strings[i] for i in selected_indices]
 
         # Return simplified response with curve count
         return jsonify({
             'result': bezier_strings,
-            'count': len(bezier_strings)
+            'count': len(bezier_strings),
+            'params': {
+                'edge_low': 50,
+                'edge_high': 150,
+                'turdsize': 4,
+                'alphamax': 1.0,
+                'opttolerance': 0.4
+            }
         })
         
     except Exception as e:
