@@ -1,5 +1,5 @@
-# Use an official Python base image (Debian-based) with Python 3.11
-FROM python:3.11-slim-bullseye
+# Use an official Python base image (Debian-based) with the latest Python version (3.12)
+FROM python:3.12-slim-bullseye
 
 # Install system dependencies for pypotrace
 RUN apt-get update && apt-get install -y --no-install-recommends \
