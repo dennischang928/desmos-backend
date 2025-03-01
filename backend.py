@@ -104,7 +104,7 @@ def process_image():
         bezier_strings = get_bezier_strings_from_trace(trace)
 
         # Limit the number of curves
-        MAX_CURVES = 500  # Adjust this value as needed
+        MAX_CURVES = 3500  # Adjust this value as needed
         if len(bezier_strings) > MAX_CURVES:
             # Take every nth curve to get approximately MAX_CURVES curves
             step = len(bezier_strings) // MAX_CURVES
