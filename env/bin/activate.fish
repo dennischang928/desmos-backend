@@ -29,7 +29,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /Users/dennischang/DesmosBezierRenderer/env
+set -gx VIRTUAL_ENV '/Users/dennischang/My Drive/Engineering/Projects/desmos-backend/env'
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
