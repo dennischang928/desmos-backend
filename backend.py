@@ -112,7 +112,7 @@ def process_image():
 
         # Return simplified response with curve count
         return jsonify({
-            'results': bezier_strings,
+            'result': bezier_strings,
             'count': len(bezier_strings)
         })
         
