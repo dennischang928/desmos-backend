@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libagg-dev \
     libjpeg-dev \
+    libpotrace-dev \
     potrace \
     pkg-config \
     zlib1g-dev \
