@@ -5,12 +5,16 @@ FROM python:3.12-slim-bullseye
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
-    pkg-config \
     libagg-dev \
+    libgl1 \
+    libjpeg-dev \
     libpotrace-dev \
-    libgl1-mesa-glx \       
+    potrace \
+    pkg-config \
+    zlib1g-dev \
     python3-dev \
  && rm -rf /var/lib/apt/lists/*
+ 
 
 # Set a working directory
 WORKDIR /app
@@ -25,4 +29,5 @@ COPY . .
 EXPOSE 5000
 
 # Use Gunicorn to run the backend Flask app
-CMD ["gunicorn", "backend:app", "--bind", "0.0.0.0:5000"]
+CMD gunicorn backend:app --bind 0.0.0.0:$PORT
+
