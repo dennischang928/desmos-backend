@@ -64,9 +64,9 @@ def get_trace_from_contours(contours):
     binary = (contours > 0).astype(np.uint8)
     bmp = potrace.Bitmap(binary)
     trace = bmp.trace(
-        turdsize=10,        # Increased from 5 - ignore smaller areas
+        turdsize=7,        # Increased from 5 - ignore smaller areas
         turnpolicy=potrace.TURNPOLICY_MINORITY,
-        alphamax=2.5,       # Increased from 2.0 - more aggressive curve smoothing
+        alphamax=3,       # Increased from 2.0 - more aggressive curve smoothing
         opticurve=1,
         opttolerance=0.2    # Reduced from 0.5 - less precise but simpler curves
     )
